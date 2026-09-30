@@ -1,0 +1,86 @@
+[
+  {
+    "line": 2,
+    "elements": [
+      {
+        "start_timestamp": "2026-09-30T07:46:56.517Z",
+        "line": 4,
+        "name": "Consulta de un endpoint y comprobacion de un campo de la respuesta",
+        "description": "",
+        "id": "parte-vehiculos;consulta-de-un-endpoint-y-comprobacion-de-un-campo-de-la-respuesta",
+        "type": "scenario",
+        "keyword": "Scenario",
+        "steps": [
+          {
+            "result": {
+              "duration": 570968100,
+              "status": "passed"
+            },
+            "line": 5,
+            "name": "Llamamos al a la API \"vehiculosParte\" con un metodo \"POST\" con el body \"parteVehiculoFechaFutura\"",
+            "match": {
+              "arguments": [
+                {
+                  "val": "\"vehiculosParte\"",
+                  "offset": 21
+                },
+                {
+                  "val": "\"POST\"",
+                  "offset": 52
+                },
+                {
+                  "val": "\"parteVehiculoFechaFutura\"",
+                  "offset": 71
+                }
+              ],
+              "location": "Stepdefs.callApiWithBody(String,String,String)"
+            },
+            "keyword": "When "
+          },
+          {
+            "result": {
+              "duration": 11881400,
+              "status": "passed"
+            },
+            "line": 6,
+            "name": "Se comprueba que devuelve un \"400\" y que el mensaje de error es \"response_parteVehiculoFechaFutura\"",
+            "match": {
+              "arguments": [
+                {
+                  "val": "\"400\"",
+                  "offset": 29
+                },
+                {
+                  "val": "\"response_parteVehiculoFechaFutura\"",
+                  "offset": 64
+                }
+              ],
+              "location": "Stepdefs.checkResponse(String,String)"
+            },
+            "keyword": "Then "
+          }
+        ],
+        "tags": [
+          {
+            "name": "@test"
+          }
+        ]
+      }
+    ],
+    "name": "Parte Vehiculos",
+    "description": "",
+    "id": "parte-vehiculos",
+    "keyword": "Feature",
+    "uri": "classpath:sido2/Vehiculos.feature",
+    "tags": [
+      {
+        "name": "@test",
+        "type": "Tag",
+        "location": {
+          "line": 1,
+          "column": 1
+        }
+      }
+    ]
+  }
+]
