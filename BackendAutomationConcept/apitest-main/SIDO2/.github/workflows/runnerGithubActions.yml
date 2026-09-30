@@ -1,0 +1,114 @@
+name: SIDO2 API Tests
+
+on:
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+    inputs:
+      maven_goal:
+        description: 'Objetivo de Maven a ejecutar'
+        required: true
+        default: 'test'
+        type: choice
+        options:
+          - 'test'
+          - 'verify'
+      cucumber_tags:
+        description: 'Tags de Cucumber'
+        required: false
+        default: '@test'
+        type: string
+      scenario_name:
+        description: 'Nombre del escenario (opcional)'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Ejecutar tests Maven/Cucumber
+    runs-on: self-hosted
+    timeout-minutes: 30
+
+    steps:
+      - name: Descargar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Mostrar versiones de Java y Maven
+        shell: powershell
+        run: |
+          java -version
+          mvn -version
+
+      - name: Ejecutar tests
+        shell: powershell
+        run: |
+          $goal = "test"
+          $cucumberOptions = ""
+
+          if ("${{ github.event_name }}" -eq "workflow_dispatch") {
+            $goal = "${{ github.event.inputs.maven_goal }}"
+            $tags = "${{ github.event.inputs.cucumber_tags }}"
+            $scenarioName = "${{ github.event.inputs.scenario_name }}"
+
+            if ($tags) {
+              $cucumberOptions = "--tags $tags"
+            }
+
+            if ($scenarioName) {
+              if ($cucumberOptions) {
+                $cucumberOptions = "$cucumberOptions --name `"$scenarioName`""
+              } else {
+                $cucumberOptions = "--name `"$scenarioName`""
+              }
+            }
+          }
+
+          $args = @("-B", "clean", $goal)
+
+          if ($cucumberOptions) {
+            $args += "-Dcucumber.options=$cucumberOptions"
+          }
+
+          Write-Host "Ejecutando: mvn $($args -join ' ')"
+          & mvn @args
+          if (-not $?) {
+            throw "La ejecucion de Maven ha fallado."
+          }
+
+      - name: Subir informes Surefire
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports
+          path: target/surefire-reports/
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Subir resultado JSON de Cucumber
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-json
+          path: target/cucumber.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Subir informe HTML de Cucumber
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-html-report
+          path: target/cucumber-report-html/
+          if-no-files-found: warn
+          retention-days: 14
